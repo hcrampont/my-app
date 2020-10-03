@@ -10,6 +10,19 @@
   <body>
     <script>
       console.log('hello toto')
+
+      fetch('https://raw.githubusercontent.com/hcrampont/my-app/master/app/test.json')
+        .then(response => response.json())
+        .then(data => {
+          console.log(data)
+          var blob = new Blob([JSON.stringify(data)], { "type": 'application/json' });
+          var url = window.URL || window.webkitURL;
+          var blobUrl = url.createObjectURL(blob);
+          console.log(blobUrl)
+          fetch(blobUrl)
+            .then(response => response.json())
+            .then(data => {console.log(data)})
+        })
     </script>
     <h1>hello toto</h1>
     <p>hello toto</p>
