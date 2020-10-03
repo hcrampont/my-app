@@ -1,15 +1,19 @@
 <html>
   <head>
     <title>hello toto</title>
+    <link rel="stylesheet" href="https://raw.githubusercontent.com/hcrampont/my-app/master/app/test.css">
     <style>
       body {background-color: powderblue;}
-      h1   {color: blue;}
-      p    {color: red;}
     </style>
   </head>
   <body>
     <script>
       console.log('hello toto')
+
+      window.onbeforeunload = function(e) {
+        console.log('onbeforeunload');
+        window.location.hash = '#start'
+      };
 
       fetch('https://raw.githubusercontent.com/hcrampont/my-app/master/app/test.json')
         .then(response => response.json())
