@@ -52,7 +52,7 @@
                 fetch(srcNodeList[i][attr])
                   .then(response => response.arrayBuffer())
                   .then(data => new Uint8Array(data))
-                  .then(data => btoa(data))
+                  .then(data => btoa(String.fromCharCode(...data)))
               )
             }
           }
