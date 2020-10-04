@@ -33,47 +33,19 @@
         })
     </script>
     <script>
-      function stripScripts(s) {
+      function inlineSources(html, target, attr, mineType) {
         return new Promise((resolve, reject) => {
-          var div = document.createElement('html');
-          div.innerHTML = s;
-          var scripts = div.getElementsByTagName('script');
-          var i = scripts.length;
-          var scriptsSrc = [];
+          var srcNodeList = html.querySelectorAll(target);
+          var i = srcNodeList.length;
+          var sources = [];
           while (i--) {
-            if (scripts[i].src) {
-              scriptsSrc.push(fetch(scripts[i].src).then(response => response.text()).then(data => data))
-            } else {
-              scriptsSrc.push(scripts[i].innerHTML)
-            }
-            scripts[i].parentNode.removeChild(scripts[i])
+            sources.push(fetch(srcNodeList[i][attr]).then(response => response.text()).then(data => data))
           }
-          Promise.all(scriptsSrc).then((values) => {
-            var globalScript = document.createElement('script');
-            globalScript.innerHTML = values.reverse().join('\n');
-            div.getElementsByTagName('head')[0].appendChild(globalScript);
-            resolve(div.innerHTML);
-          });
-        });
-      }
-
-      function stripStyles(s) {
-        console.log(s)
-        return new Promise((resolve, reject) => {
-          var div = document.createElement('html');
-          div.innerHTML = s;
-          var styles = div.getElementsByTagName('link');
-          var i = styles.length;
-          var stylesSrc = [];
-          while (i--) {
-            stylesSrc.push(fetch(styles[i].href).then(response => response.text()).then(data => data))
-            styles[i].parentNode.removeChild(styles[i])
-          }
-          Promise.all(stylesSrc).then((values) => {
-            var styleTag = div.getElementsByTagName('style')[0];
-            var globalStyles = [styleTag.innerHTML].concat(values).reverse();
-            div.getElementsByTagName('style')[0].innerHTML = globalStyles.join('\n');
-            resolve(div.innerHTML);
+          Promise.all(sources).then((values) => {
+            values.forEach((value, i) => {
+              srcNodeList[i][attr] = `data:${mineType};base64,${btoa(value)}`;
+            })
+            resolve(html)
           });
         });
       }
@@ -82,18 +54,16 @@
         fetch(url)
           .then(response => response.text())
           .then(data => {
-            var html;
-            html = data
-            stripScripts(data)
-              .then(htmlScripts => {
-                stripStyles(htmlScripts).then(htmlStyles => {
-                  console.log(htmlStyles)
-                  var blob = new Blob([htmlStyles], { "type": 'text/html' });
-                  var url = window.URL || window.webkitURL;
-                  var blobUrl = url.createObjectURL(blob);
-                  console.log(blobUrl)
-                  window.open(blobUrl, '_self')
-                })
+            var html = document.createElement('html');
+            html.innerHTML = data;
+
+            inlineSources(html, 'script[src]', 'src', 'text/javascript')
+              .then(html => inlineSources(html, 'link[href]', 'href', 'text/css'))
+              .then(html => {
+                var blob = new Blob([html.innerHTML], { "type": 'text/html' });
+                var url = window.URL || window.webkitURL;
+                var blobUrl = url.createObjectURL(blob);
+                window.open(blobUrl, '_self')
               })
           })
       }
