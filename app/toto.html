@@ -3,6 +3,7 @@
     <title>hello toto</title>
     <link rel="stylesheet" href="https://raw.githubusercontent.com/hcrampont/my-app/master/app/test.css">
     <link rel="stylesheet" href="https://raw.githubusercontent.com/hcrampont/my-app/master/app/test2.css">
+    <script type="text/javascript" src="https://raw.githubusercontent.com/hcrampont/my-app/master/app/toto.js"></script>
     <style>
       body {background-color: powderblue;}
     </style>
@@ -10,12 +11,14 @@
   <body>
     <script>
       console.log('hello toto')
-
+    </script>
+    <script>
       window.onbeforeunload = function(e) {
         console.log('onbeforeunload');
         window.location.hash = '#start'
       };
-
+    </script>
+    <script>
       fetch('https://raw.githubusercontent.com/hcrampont/my-app/master/app/test.json')
         .then(response => response.json())
         .then(data => {
