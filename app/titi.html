@@ -39,11 +39,26 @@
           var i = srcNodeList.length;
           var sources = [];
           while (i--) {
-            sources.push(fetch(srcNodeList[i][attr]).then(response => response.text()).then(data => data))
+            if (mineType === 'text/javascript' || mineType === 'text/css') {
+              sources.push(
+                fetch(srcNodeList[i][attr])
+                  .then(response => response.text())
+                  .then(data => btoa(data))
+              )
+            }
+
+            if (mineType === 'image/png' || mineType === 'image/jpeg') {
+              sources.push(
+                fetch(srcNodeList[i][attr])
+                  .then(response => response.arrayBuffer())
+                  .then(data => new Uint8Array(data))
+                  .then(data => btoa(data))
+              )
+            }
           }
           Promise.all(sources).then((values) => {
             values.forEach((value, i) => {
-              srcNodeList[i][attr] = `data:${mineType};base64,${btoa(value)}`;
+              srcNodeList[i][attr] = `data:${mineType};base64,${value}`;
             })
             resolve(html)
           });
@@ -59,6 +74,8 @@
 
             inlineSources(html, 'script[src]', 'src', 'text/javascript')
               .then(html => inlineSources(html, 'link[href]', 'href', 'text/css'))
+              .then(html => inlineSources(html, 'img[src*=".png"]', 'src', 'image/png'))
+              .then(html => inlineSources(html, 'img[src*=".jpg"],img[src*=".jpeg"]', 'src', 'image/jpeg'))
               .then(html => {
                 var blob = new Blob([html.innerHTML], { "type": 'text/html' });
                 var url = window.URL || window.webkitURL;
@@ -70,5 +87,7 @@
     </script>
     <h1>hello titi</h1>
     <p>hello titi</p>
+    <img src="https://raw.githubusercontent.com/hcrampont/my-app/master/app/img_png.png" style="width: 100px; height: auto;" />
+    <img src="https://raw.githubusercontent.com/hcrampont/my-app/master/app/img_jpg.jpg" style="width: 100px; height: auto;" />
   </body>
 </html>
