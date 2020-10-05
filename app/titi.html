@@ -3,6 +3,7 @@
     <title>hello titi</title>
     <link rel="stylesheet" href="https://raw.githubusercontent.com/hcrampont/my-app/master/app/test.css">
     <link rel="stylesheet" href="https://raw.githubusercontent.com/hcrampont/my-app/master/app/test2.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source Code Pro">
     <script type="text/javascript" src="https://raw.githubusercontent.com/hcrampont/my-app/master/app/toto.js"></script>
     <style>
       body {background-color: powderblue;}
@@ -39,26 +40,16 @@
           var i = srcNodeList.length;
           var sources = [];
           while (i--) {
-            if (mineType === 'text/javascript' || mineType === 'text/css') {
-              sources.push(
-                fetch(srcNodeList[i][attr])
-                  .then(response => response.text())
-                  .then(data => btoa(data))
-              )
-            }
-
-            if (mineType === 'image/png' || mineType === 'image/jpeg') {
-              sources.push(
-                fetch(srcNodeList[i][attr])
-                  .then(response => response.arrayBuffer())
-                  .then(data => new Uint8Array(data))
-                  .then(data => btoa(String.fromCharCode(...data)))
-              )
-            }
+            sources.push(
+              fetch(srcNodeList[i][attr])
+                .then(response => response.arrayBuffer())
+                .then(data => new Blob([new Uint8Array(data)], { 'type': mineType }))
+                .then(blob => URL.createObjectURL(blob))
+            )
           }
           Promise.all(sources).then((values) => {
             values.forEach((value, i) => {
-              srcNodeList[i][attr] = `data:${mineType};base64,${value}`;
+              srcNodeList[i][attr] = value;
             })
             resolve(html)
           });
@@ -78,9 +69,10 @@
               .then(html => inlineSources(html, 'img[src*=".jpg"],img[src*=".jpeg"]', 'src', 'image/jpeg'))
               .then(html => {
                 var blob = new Blob([html.innerHTML], { "type": 'text/html' });
-                var url = window.URL || window.webkitURL;
-                var blobUrl = url.createObjectURL(blob);
-                window.open(blobUrl, '_self')
+                var blobUrl = URL.createObjectURL(blob);
+                console.log(blobUrl, html)
+                history.pushState({}, '', `/user/app/${blobUrl.split('/').reverse()[0]}`)
+                document.getElementsByTagName('html')[0].innerHTML = html.innerHTML;
               })
           })
       }
