@@ -1,0 +1,20 @@
+{
+  "googleApiKey": "AIzaSyAo-CSPSJ17Jh-od8Jvc2kqbqyW8bJ_f-g",
+  "backends": {
+    "ms-account": "http://api.local.monbelimmeuble.com:8080/account",
+    "social-network": "http://api.local.monbelimmeuble.com:8080/social-network"
+  },
+  "amplify": {
+    "Auth": {
+      "mandatorySignIn": true,
+      "region": "eu-west-1",
+      "userPoolId": "eu-west-1_Dj4MLeoRs",
+      "userPoolWebClientId": "7t2vm8igjetod38pt91o4vcekq"
+    },
+    "cookieStorage": {
+      "domain": "app.local.monbelimmeuble.com",
+      "expires": 365,
+      "secure": false
+    }
+  }
+}
